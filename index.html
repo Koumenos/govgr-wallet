@@ -27,20 +27,20 @@ html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'S
 /* ════════════════════════════
    SCREEN 1 — MAIN
 ════════════════════════════ */
-#s-main{align-items:center;justify-content:space-between;padding:60px 22px 34px;}
+#s-main{align-items:center;justify-content:space-between;padding:55px 22px 32px;}
 
 /* Logo + QR brackets combined — logo sits centered inside the frame */
-.logo-frame-wrap{position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center;}
-.logo-in-frame{position:absolute;display:flex;flex-direction:column;align-items:center;gap:5px;z-index:1;}
-.logo-in-frame-row{display:flex;align-items:center;gap:9px;}
-.logo-in-frame-name{font-size:1.65rem;font-weight:800;color:#fff;letter-spacing:-0.01em;}
+.logo-frame-wrap{position:relative;width:240px;height:160px;display:flex;align-items:center;justify-content:center;}
+.logo-in-frame{position:absolute;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1;}
+.logo-in-frame-row{display:flex;align-items:center;gap:10px;}
+.logo-in-frame-name{font-size:1.7rem;font-weight:800;color:#fff;letter-spacing:-0.01em;}
 .logo-in-frame-name span{color:#4ec9ff;}
-.logo-in-frame-wallet{font-size:1.05rem;font-weight:400;color:#fff;letter-spacing:0.2em;}
+.logo-in-frame-wallet{font-size:1.1rem;font-weight:400;color:#fff;letter-spacing:0.22em;}
 
-.qr-frame{width:200px;height:200px;position:relative;}
+.qr-frame{width:240px;height:160px;position:relative;}
 .qr-frame::before,.qr-frame::after,.qr-frame .qr-bl::before,.qr-frame .qr-bl::after{
-  content:'';position:absolute;width:36px;height:36px;
-  border-color:rgba(255,255,255,0.48);border-style:solid;
+  content:'';position:absolute;width:34px;height:34px;
+  border-color:rgba(255,255,255,0.5);border-style:solid;
 }
 .qr-frame::before{top:0;left:0;border-width:3px 0 0 3px;}
 .qr-frame::after{top:0;right:0;border-width:3px 3px 0 0;}
