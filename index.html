@@ -29,16 +29,18 @@ html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'S
 ════════════════════════════ */
 #s-main{align-items:center;justify-content:space-between;padding:60px 22px 34px;}
 
-.main-logo{display:flex;flex-direction:column;align-items:center;gap:3px;}
-.main-logo-row{display:flex;align-items:center;gap:9px;}
-.main-logo-name{font-size:1.65rem;font-weight:800;color:#fff;letter-spacing:-0.01em;}
-.main-logo-name span{color:#4ec9ff;}
-.main-wallet{font-size:1.1rem;font-weight:400;color:#fff;letter-spacing:0.18em;}
+/* Logo + QR brackets combined — logo sits centered inside the frame */
+.logo-frame-wrap{position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center;}
+.logo-in-frame{position:absolute;display:flex;flex-direction:column;align-items:center;gap:5px;z-index:1;}
+.logo-in-frame-row{display:flex;align-items:center;gap:9px;}
+.logo-in-frame-name{font-size:1.65rem;font-weight:800;color:#fff;letter-spacing:-0.01em;}
+.logo-in-frame-name span{color:#4ec9ff;}
+.logo-in-frame-wallet{font-size:1.05rem;font-weight:400;color:#fff;letter-spacing:0.2em;}
 
-.qr-frame{width:180px;height:180px;position:relative;}
+.qr-frame{width:200px;height:200px;position:relative;}
 .qr-frame::before,.qr-frame::after,.qr-frame .qr-bl::before,.qr-frame .qr-bl::after{
-  content:'';position:absolute;width:34px;height:34px;
-  border-color:rgba(255,255,255,0.45);border-style:solid;
+  content:'';position:absolute;width:36px;height:36px;
+  border-color:rgba(255,255,255,0.48);border-style:solid;
 }
 .qr-frame::before{top:0;left:0;border-width:3px 0 0 3px;}
 .qr-frame::after{top:0;right:0;border-width:3px 3px 0 0;}
@@ -91,7 +93,7 @@ html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'S
 #s-provider{background:#fff;overflow:hidden;}
 
 .browser-bar{
-  background:#f2f2f7;padding:52px 14px 10px;
+  background:#f2f2f7;padding:14px 14px 10px;
   display:flex;align-items:center;justify-content:space-between;
   border-bottom:1px solid #d8d8dc;flex-shrink:0;
 }
@@ -109,11 +111,11 @@ html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'S
 }
 
 .prov-hdr{
-  background:#003375;padding:13px 16px;
-  display:flex;align-items:center;gap:10px;flex-shrink:0;
+  background:#003375;padding:12px 16px 14px;
+  display:flex;flex-direction:column;gap:4px;flex-shrink:0;
 }
-.prov-hdr-logo{display:flex;align-items:center;gap:7px;color:#fff;font-size:0.95rem;font-weight:700;}
-.prov-hdr-title{color:#fff;font-size:1rem;font-weight:700;margin-left:auto;}
+.prov-hdr-logo{display:flex;align-items:center;gap:6px;color:#fff;font-size:0.85rem;font-weight:600;}
+.prov-hdr-title{color:#fff;font-size:1.18rem;font-weight:800;}
 
 .prov-body{padding:20px 16px 20px;overflow-y:auto;flex:1;}
 .prov-body h2{font-size:1.38rem;font-weight:800;color:#111;margin-bottom:20px;line-height:1.25;}
@@ -137,7 +139,7 @@ html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'S
 #s-login{background:#e8e8ed;overflow:hidden;}
 
 .browser-bar-light{
-  background:#f2f2f7;padding:52px 14px 10px;
+  background:#f2f2f7;padding:14px 14px 10px;
   display:flex;align-items:center;justify-content:space-between;
   border-bottom:1px solid #d8d8dc;flex-shrink:0;
 }
@@ -184,8 +186,8 @@ html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'S
 /* ════════════════════════════
    SCREEN 5 — SECURITY CHECK
 ════════════════════════════ */
-#s-security{align-items:center;justify-content:space-between;padding:58px 28px 34px;text-align:center;}
-.sec-logo{padding-bottom:4px;}
+#s-security{align-items:center;justify-content:space-between;padding:54px 28px 34px;text-align:center;}
+.sec-logo{padding-bottom:2px;opacity:0.85;}
 .sec-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
 .sec-title{color:#fff;font-size:1.15rem;font-weight:700;}
 .sec-desc{color:rgba(255,255,255,0.7);font-size:0.92rem;line-height:1.6;max-width:270px;}
@@ -245,20 +247,20 @@ html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'S
 }
 
 .card-top{
-  padding:10px 14px 8px;
+  padding:12px 14px 10px;
   display:flex;align-items:flex-start;justify-content:space-between;
-  background:rgba(0,0,0,0.1);
+  background:rgba(0,20,80,0.25);min-height:100px;
 }
-.card-label{color:rgba(255,255,255,0.9);font-size:0.88rem;font-weight:600;}
+.card-label{color:rgba(255,255,255,0.92);font-size:0.88rem;font-weight:600;padding-top:2px;}
 .card-photo{
-  width:74px;height:86px;border-radius:5px;
+  width:84px;height:96px;border-radius:6px;
   overflow:hidden;flex-shrink:0;
-  border:2px solid rgba(255,255,255,0.22);
+  border:2px solid rgba(255,255,255,0.28);
 }
 .card-photo img{width:100%;height:100%;object-fit:cover;object-position:center top;}
-.card-body{padding:10px 14px 16px;}
-.card-num{font-size:1.65rem;font-weight:800;color:#fff;letter-spacing:0.02em;}
-.card-date{font-size:0.83rem;color:rgba(255,255,255,0.68);margin-top:3px;}
+.card-body{padding:12px 14px 16px;}
+.card-num{font-size:1.7rem;font-weight:800;color:#fff;letter-spacing:0.02em;}
+.card-date{font-size:0.84rem;color:rgba(255,255,255,0.7);margin-top:3px;}
 
 .license-slide{
   min-width:calc(100% - 36px);scroll-snap-align:start;flex-shrink:0;
@@ -405,22 +407,23 @@ html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'S
      SCREEN 1 — MAIN
 ════════════════════════════ -->
 <div id="s-main" class="screen active dark-bg">
-  <div class="main-logo">
-    <div class="main-logo-row">
-      <svg class="globe-svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
-        <circle cx="15" cy="15" r="13" stroke="#4ec9ff" stroke-width="1.8"/>
-        <path d="M15 2C15 2 9.5 7.5 9.5 15C9.5 22.5 15 28 15 28" stroke="#4ec9ff" stroke-width="1.4"/>
-        <path d="M15 2C15 2 20.5 7.5 20.5 15C20.5 22.5 15 28 15 28" stroke="#4ec9ff" stroke-width="1.4"/>
-        <path d="M2 15H28" stroke="#4ec9ff" stroke-width="1.4"/>
-        <path d="M3.5 9.5H26.5" stroke="#4ec9ff" stroke-width="1.1"/>
-        <path d="M3.5 20.5H26.5" stroke="#4ec9ff" stroke-width="1.1"/>
-      </svg>
-      <span class="main-logo-name">gov<span>.gr</span></span>
+  <div class="logo-frame-wrap">
+    <div class="qr-frame"><div class="qr-bl"></div></div>
+    <div class="logo-in-frame">
+      <div class="logo-in-frame-row">
+        <svg width="28" height="28" viewBox="0 0 30 30" fill="none">
+          <circle cx="15" cy="15" r="13" stroke="#4ec9ff" stroke-width="1.8"/>
+          <path d="M15 2C15 2 9.5 7.5 9.5 15C9.5 22.5 15 28 15 28" stroke="#4ec9ff" stroke-width="1.4"/>
+          <path d="M15 2C15 2 20.5 7.5 20.5 15C20.5 22.5 15 28 15 28" stroke="#4ec9ff" stroke-width="1.4"/>
+          <path d="M2 15H28" stroke="#4ec9ff" stroke-width="1.4"/>
+          <path d="M3.5 9.5H26.5" stroke="#4ec9ff" stroke-width="1.1"/>
+          <path d="M3.5 20.5H26.5" stroke="#4ec9ff" stroke-width="1.1"/>
+        </svg>
+        <span class="logo-in-frame-name">gov<span>.gr</span></span>
+      </div>
+      <span class="logo-in-frame-wallet">wallet</span>
     </div>
-    <span class="main-wallet">wallet</span>
   </div>
-
-  <div class="qr-frame"><div class="qr-bl"></div></div>
 
   <div class="btn-group">
     <div class="main-btn-row">
@@ -497,7 +500,7 @@ html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'S
   </div>
   <div class="prov-hdr">
     <div class="prov-hdr-logo">
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
         <circle cx="11" cy="11" r="9.5" stroke="white" stroke-width="1.5"/>
         <path d="M11 1.5C11 1.5 7.5 5 7.5 11C7.5 17 11 20.5 11 20.5" stroke="white" stroke-width="1.1"/>
         <path d="M11 1.5C11 1.5 14.5 5 14.5 11C14.5 17 11 20.5 11 20.5" stroke="white" stroke-width="1.1"/>
@@ -505,7 +508,7 @@ html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'S
       </svg>
       gov.gr
     </div>
-    <span class="prov-hdr-title">Επιλογή φορέα</span>
+    <div class="prov-hdr-title">Επιλογή φορέα</div>
   </div>
   <div class="prov-body">
     <h2>Σε ποιον φορέα έχετε λογαριασμό;</h2>
