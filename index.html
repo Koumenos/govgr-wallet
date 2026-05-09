@@ -1,275 +1,413 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>gov.gr Wallet</title>
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="gov.gr Wallet">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>gov.gr Wallet</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="gov.gr Wallet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;overflow:hidden;background:#001240;}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden;}
+.screen.active{display:flex;}
 
-    html, body {
-      height: 100%; width: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-      overflow: hidden;
-      background: #001240;
-    }
+.dark-bg{
+  background-color:#001240;
+  background-image:
+    radial-gradient(ellipse 80% 55% at 50% 0%,rgba(0,80,200,0.38) 0%,transparent 68%),
+    radial-gradient(circle,rgba(100,160,255,0.052) 1px,transparent 1px);
+  background-size:100% 100%,22px 22px;
+}
 
-    .screen {
-      position: absolute; inset: 0;
-      display: none; flex-direction: column;
-      overflow: hidden;
-    }
-    .screen.active { display: flex; }
+/* ── GLOBE SVG (reused) ── */
+.globe-svg{flex-shrink:0;}
 
-    /* ── DARK BG shared by screens 1, 4 ── */
-    .dark-bg {
-      background-color: #001240;
-      background-image:
-        radial-gradient(ellipse 80% 55% at 50% 0%, rgba(0,80,200,0.38) 0%, transparent 68%),
-        radial-gradient(circle, rgba(100,160,255,0.055) 1px, transparent 1px);
-      background-size: 100% 100%, 22px 22px;
-    }
+/* ════════════════════════════
+   SCREEN 1 — MAIN
+════════════════════════════ */
+#s-main{align-items:center;justify-content:space-between;padding:60px 22px 34px;}
 
-    /* ── GOV.GR LOGO ── */
-    .govgr-logo { display:flex; flex-direction:column; align-items:center; gap:2px; }
-    .govgr-logo-row { display:flex; align-items:center; gap:8px; }
-    .gov-name { font-size:1.55rem; font-weight:800; color:#fff; letter-spacing:-0.01em; }
-    .gov-name span { color:#4ec9ff; }
-    .wallet-label { font-size:1.05rem; font-weight:400; color:#4ec9ff; letter-spacing:0.18em; }
+.main-logo{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.main-logo-row{display:flex;align-items:center;gap:9px;}
+.main-logo-name{font-size:1.65rem;font-weight:800;color:#fff;letter-spacing:-0.01em;}
+.main-logo-name span{color:#4ec9ff;}
+.main-wallet{font-size:1.1rem;font-weight:400;color:#fff;letter-spacing:0.18em;}
 
-    /* ══════════════════════════════════════
-       SCREEN 1 — MAIN
-    ══════════════════════════════════════ */
-    #s-main {
-      align-items:center;
-      justify-content:space-between;
-      padding: 64px 28px 36px;
-    }
+.qr-frame{width:180px;height:180px;position:relative;}
+.qr-frame::before,.qr-frame::after,.qr-frame .qr-bl::before,.qr-frame .qr-bl::after{
+  content:'';position:absolute;width:34px;height:34px;
+  border-color:rgba(255,255,255,0.45);border-style:solid;
+}
+.qr-frame::before{top:0;left:0;border-width:3px 0 0 3px;}
+.qr-frame::after{top:0;right:0;border-width:3px 3px 0 0;}
+.qr-frame .qr-bl::before{bottom:0;left:0;border-width:0 0 3px 3px;}
+.qr-frame .qr-bl::after{bottom:0;right:0;border-width:0 3px 3px 0;}
 
-    .qr-frame { width:170px; height:170px; position:relative; }
-    .qr-frame::before, .qr-frame::after,
-    .qr-frame .qr-bl::before, .qr-frame .qr-bl::after {
-      content:''; position:absolute; width:32px; height:32px;
-      border-color:rgba(255,255,255,0.42); border-style:solid;
-    }
-    .qr-frame::before  { top:0;    left:0;  border-width:2px 0 0 2px; }
-    .qr-frame::after   { top:0;    right:0; border-width:2px 2px 0 0; }
-    .qr-frame .qr-bl::before { bottom:0; left:0;  border-width:0 0 2px 2px; }
-    .qr-frame .qr-bl::after  { bottom:0; right:0; border-width:0 2px 2px 0; }
+.btn-group{width:100%;display:flex;flex-direction:column;gap:11px;}
 
-    .btn-group { width:100%; display:flex; flex-direction:column; gap:11px; }
+.main-btn-row{display:flex;gap:9px;align-items:stretch;}
+.btn-teal{
+  flex:1;padding:16px 14px;
+  background:linear-gradient(120deg,#1fc4ef,#1aadd8);
+  border:none;border-radius:12px;
+  color:#fff;font-size:0.97rem;font-weight:700;
+  cursor:pointer;text-align:center;
+}
+.btn-teal:active{filter:brightness(0.88);}
+.btn-faceid{
+  width:56px;flex-shrink:0;
+  background:rgba(255,255,255,0.05);
+  border:1.8px solid rgba(78,201,255,0.45);
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.btn-faceid:active{background:rgba(255,255,255,0.1);}
 
-    .btn-filled {
-      width:100%; padding:15px 18px;
-      background:#1a6fd4; border:none; border-radius:10px;
-      color:#fff; font-size:0.97rem; font-weight:700;
-      display:flex; align-items:center; justify-content:space-between;
-      cursor:pointer;
-    }
-    .btn-filled:active { filter:brightness(0.88); }
+.btn-outline{
+  width:100%;padding:15px 18px;
+  background:rgba(255,255,255,0.05);
+  border:1.5px solid rgba(255,255,255,0.22);
+  border-radius:12px;color:#fff;
+  font-size:0.95rem;font-weight:500;
+  display:flex;align-items:center;gap:12px;cursor:pointer;
+}
+.btn-outline:active{background:rgba(255,255,255,0.12);}
 
-    .btn-outline {
-      width:100%; padding:14px 18px;
-      background:rgba(255,255,255,0.07);
-      border:1.5px solid rgba(255,255,255,0.24);
-      border-radius:10px; color:#fff;
-      font-size:0.95rem; font-weight:500;
-      display:flex; align-items:center; gap:12px; cursor:pointer;
-    }
-    .btn-outline:active { background:rgba(255,255,255,0.14); }
+.divider{
+  display:flex;align-items:center;gap:10px;
+  color:rgba(255,255,255,0.32);font-size:0.78rem;letter-spacing:0.04em;
+}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.12);}
 
-    .divider {
-      display:flex; align-items:center; gap:10px;
-      color:rgba(255,255,255,0.33); font-size:0.78rem; letter-spacing:0.04em;
-    }
-    .divider::before, .divider::after {
-      content:''; flex:1; height:1px; background:rgba(255,255,255,0.12);
-    }
+.bottom-gov{display:flex;align-items:center;gap:8px;}
+.bottom-gov-name{font-size:1.15rem;font-weight:800;color:#fff;}
+.bottom-gov-name span{color:#4ec9ff;}
 
-    .bottom-gov {
-      display:flex; align-items:center; gap:7px;
-      color:rgba(255,255,255,0.45); font-size:0.82rem; font-weight:600;
-    }
+/* ════════════════════════════
+   SCREEN 2 — PROVIDER
+════════════════════════════ */
+#s-provider{background:#fff;overflow:hidden;}
 
-    /* ══════════════════════════════════════
-       SCREEN 2 — PROVIDER SELECTION
-    ══════════════════════════════════════ */
-    #s-provider { background:#fff; overflow:hidden; }
+.browser-bar{
+  background:#f2f2f7;padding:52px 14px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid #d8d8dc;flex-shrink:0;
+}
+.browser-x{
+  width:33px;height:33px;border-radius:50%;
+  background:#e5e5ea;border:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.9rem;color:#444;cursor:pointer;flex-shrink:0;
+}
+.browser-url{font-size:0.83rem;color:#333;font-weight:500;flex:1;text-align:center;}
+.browser-menu{
+  width:33px;height:33px;border-radius:8px;
+  background:#e5e5ea;border:none;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+}
 
-    .browser-bar {
-      background:#ebebeb; padding:10px 14px;
-      display:flex; align-items:center; gap:10px;
-      border-bottom:1px solid #d0d0d0; flex-shrink:0;
-    }
-    .x-btn { background:none; border:none; font-size:1rem; color:#444; cursor:pointer; }
-    .url { font-size:0.77rem; color:#555; }
+.prov-hdr{
+  background:#003375;padding:13px 16px;
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.prov-hdr-logo{display:flex;align-items:center;gap:7px;color:#fff;font-size:0.95rem;font-weight:700;}
+.prov-hdr-title{color:#fff;font-size:1rem;font-weight:700;margin-left:auto;}
 
-    .prov-header {
-      background:#003375; padding:14px 16px;
-      display:flex; align-items:center; gap:10px; flex-shrink:0;
-    }
-    .prov-header-logo { display:flex; align-items:center; gap:6px; color:#fff; font-size:0.95rem; font-weight:700; }
-    .prov-header-title { color:#fff; font-size:0.95rem; font-weight:600; }
+.prov-body{padding:20px 16px 20px;overflow-y:auto;flex:1;}
+.prov-body h2{font-size:1.38rem;font-weight:800;color:#111;margin-bottom:20px;line-height:1.25;}
 
-    .prov-body { padding:22px 16px; overflow-y:auto; flex:1; }
-    .prov-body h2 { font-size:1.35rem; font-weight:800; color:#111; margin-bottom:20px; line-height:1.25; }
+.prov-card{border:1px solid #e0e4ea;border-radius:8px;padding:16px;margin-bottom:12px;}
+.prov-logo-area{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.prov-org-text{font-size:0.65rem;font-weight:700;color:#c0392b;line-height:1.4;}
+.btn-green{width:100%;padding:13px;background:#1a6b3a;border:none;border-radius:6px;color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer;line-height:1.35;}
+.btn-green:active{background:#145730;}
+.btn-bank{width:100%;padding:13px;background:#1a6b3a;border:none;border-radius:6px;color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer;}
+.btn-bank-blue{width:100%;padding:13px;background:#00397a;border:none;border-radius:6px;color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer;}
 
-    .prov-card { border:1px solid #dde1e7; border-radius:6px; padding:16px; margin-bottom:12px; }
-    .prov-card-top { display:flex; align-items:flex-start; gap:10px; margin-bottom:14px; }
-    .prov-card-logo-box { background:#f0f4fa; border-radius:6px; padding:6px; display:flex; align-items:center; justify-content:center; }
-    .prov-card-text { font-size:0.72rem; line-height:1.4; color:#003375; font-weight:600; }
+.nbg-name{font-size:1.1rem;font-weight:900;color:#003375;letter-spacing:0.01em;}
+.nbg-bottom{display:flex;align-items:center;gap:7px;margin-top:2px;}
+.nbg-dot{width:15px;height:15px;border-radius:50%;border:3px solid #003375;flex-shrink:0;}
+.nbg-bottom span{font-size:1rem;font-weight:900;color:#003375;}
 
-    .btn-green { width:100%; padding:12px; background:#00703c; border:none; border-radius:4px; color:#fff; font-size:0.88rem; font-weight:700; cursor:pointer; }
-    .btn-green:active { background:#005a30; }
-    .btn-blue-bank { width:100%; padding:12px; background:#1a6fd4; border:none; border-radius:4px; color:#fff; font-size:0.88rem; font-weight:700; cursor:pointer; }
+/* ════════════════════════════
+   SCREEN 3 — LOGIN
+════════════════════════════ */
+#s-login{background:#e8e8ed;overflow:hidden;}
 
-    .nbg-name { font-size:1.05rem; font-weight:900; color:#003375; }
-    .nbg-sub { display:flex; align-items:center; gap:6px; font-size:0.95rem; font-weight:700; color:#003375; margin-top:2px; }
-    .nbg-ball { width:14px; height:14px; border-radius:50%; background:#003375; border:2px solid #fff; box-shadow:0 0 0 2px #003375; flex-shrink:0; }
-    .piraeus-name { font-size:1rem; font-weight:700; color:#00397a; font-style:italic; }
+.browser-bar-light{
+  background:#f2f2f7;padding:52px 14px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid #d8d8dc;flex-shrink:0;
+}
 
-    /* ══════════════════════════════════════
-       SCREEN 3 — TAXISNET LOGIN
-    ══════════════════════════════════════ */
-    #s-login { background:#e0e0e0; overflow:hidden; }
-    .login-inner { flex:1; overflow-y:auto; display:flex; flex-direction:column; }
-    .login-card { background:#fff; margin:10px; border-radius:6px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.12); }
-    .login-card-logos { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid #eee; gap:8px; }
-    .org { font-size:0.62rem; font-weight:700; color:#003375; line-height:1.35; }
-    .login-card-header { background:#4a7fc1; padding:11px 14px; display:flex; align-items:center; justify-content:space-between; }
-    .login-card-header span { color:#fff; font-size:0.88rem; font-weight:700; }
-    .login-card-header a { color:#fff; font-size:0.8rem; text-decoration:underline; cursor:pointer; }
-    .login-card-body { padding:22px 18px 20px; }
-    .login-card-body h2 { text-align:center; font-size:1.25rem; font-weight:800; margin-bottom:8px; color:#111; }
-    .login-card-body p { text-align:center; font-size:0.82rem; color:#555; margin-bottom:20px; line-height:1.55; }
-    .field { margin-bottom:14px; }
-    .field label { display:block; font-size:0.82rem; font-weight:600; color:#333; margin-bottom:5px; }
-    .field input { width:100%; padding:9px 11px; border:1px solid #bbb; border-radius:4px; font-size:0.93rem; font-family:inherit; outline:none; }
-    .field input:focus { border-color:#4a7fc1; }
-    .btn-taxisnet { width:100%; padding:13px; background:#4a7fc1; border:none; border-radius:4px; color:#fff; font-size:0.97rem; font-weight:700; cursor:pointer; margin-top:4px; }
-    .btn-taxisnet:active { background:#3a6baa; }
-    .login-footnote { text-align:center; margin-top:16px; font-size:0.75rem; color:#1a6fd4; line-height:1.5; }
+.login-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding:14px;}
+.login-card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.login-logos{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;gap:10px;}
+.org-left{font-size:0.6rem;font-weight:700;color:#c0392b;line-height:1.35;}
+.org-right{font-size:0.6rem;font-weight:700;color:#003375;line-height:1.35;text-align:right;}
+.logo-divider{width:1px;height:44px;background:#eee;flex-shrink:0;}
+.login-hdr{background:#4a7fc1;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;}
+.login-hdr-text{color:#fff;font-size:0.9rem;font-weight:700;}
+.login-hdr-en{color:#fff;font-size:0.8rem;background:rgba(255,255,255,0.2);padding:3px 9px;border-radius:3px;cursor:pointer;}
+.login-body{padding:24px 20px 20px;}
+.login-body h2{text-align:center;font-size:1.38rem;font-weight:800;margin-bottom:8px;color:#111;}
+.login-body p{text-align:center;font-size:0.84rem;color:#555;margin-bottom:18px;line-height:1.55;}
+.login-sep{height:1px;background:#eee;margin-bottom:18px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:0.85rem;font-weight:600;color:#222;margin-bottom:6px;}
+.field input{width:100%;padding:10px 12px;border:1.5px solid #ccc;border-radius:5px;font-size:0.95rem;font-family:inherit;outline:none;color:#111;}
+.field input:focus{border-color:#4a7fc1;}
+.btn-syndesi{width:100%;padding:13px;background:#4a7fc1;border:none;border-radius:5px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;margin-top:6px;}
+.btn-syndesi:active{background:#3a6baa;}
+.login-note{text-align:center;margin-top:18px;font-size:0.76rem;color:#1a6fd4;line-height:1.5;}
 
-    /* ══════════════════════════════════════
-       SCREEN 4 — SECURITY CHECK
-    ══════════════════════════════════════ */
-    #s-security { align-items:center; justify-content:space-between; padding:64px 28px 36px; text-align:center; }
-    .sec-body { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; }
-    .sec-title { color:#fff; font-size:1.15rem; font-weight:700; }
-    .sec-desc { color:rgba(255,255,255,0.65); font-size:0.92rem; line-height:1.6; max-width:270px; }
-    .sec-icons { display:flex; flex-direction:column; align-items:center; gap:18px; margin:6px 0; }
-    .sec-note { color:rgba(255,255,255,0.38); font-size:0.78rem; max-width:250px; line-height:1.55; }
-    .btn-confirm { width:100%; padding:15px; background:#1a6fd4; border:none; border-radius:10px; color:#fff; font-size:0.97rem; font-weight:700; cursor:pointer; }
-    .btn-confirm:active { filter:brightness(0.88); }
+/* ════════════════════════════
+   SCREEN 4 — CONSENT
+════════════════════════════ */
+#s-consent{background:#e8e8ed;overflow:hidden;}
 
-    /* ══════════════════════════════════════
-       SCREEN 5 — IDENTITY CARD
-    ══════════════════════════════════════ */
-    #s-idcard {
-      background-color: #003375;
-      background-image:
-        /* Topographic contour lines */
-        radial-gradient(ellipse 120% 80% at 80% 30%, rgba(0,60,140,0.6) 0%, transparent 60%),
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='1'%3E%3Cellipse cx='200' cy='200' rx='60' ry='30'/%3E%3Cellipse cx='200' cy='200' rx='90' ry='50'/%3E%3Cellipse cx='200' cy='200' rx='120' ry='70'/%3E%3Cellipse cx='200' cy='200' rx='150' ry='90'/%3E%3Cellipse cx='200' cy='200' rx='180' ry='110'/%3E%3Cellipse cx='200' cy='200' rx='210' ry='130'/%3E%3Cellipse cx='200' cy='200' rx='240' ry='150'/%3E%3Cellipse cx='200' cy='200' rx='270' ry='170'/%3E%3Cellipse cx='200' cy='200' rx='300' ry='190'/%3E%3Cellipse cx='200' cy='200' rx='330' ry='210'/%3E%3C/g%3E%3C/svg%3E");
-      background-size: 100% 100%, 400px 400px;
-      background-position: center, 60% 20%;
-      overflow: hidden;
-    }
+.consent-text-body{padding:20px 20px 4px;font-size:0.87rem;color:#1a1a1a;line-height:1.65;}
+.consent-text-body strong{font-weight:700;}
+.radio-group{display:flex;gap:26px;padding:0 20px;margin-bottom:20px;}
+.radio-opt{display:flex;align-items:center;gap:8px;font-size:0.9rem;color:#222;cursor:pointer;}
+.radio-circle{
+  width:22px;height:22px;border-radius:50%;border:2px solid #aaa;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+}
+.radio-circle.on{border-color:#4a7fc1;background:#4a7fc1;}
+.radio-circle.on::after{content:'';width:9px;height:9px;border-radius:50%;background:#fff;}
+.btn-apostoli{padding:12px 30px;background:#4a7fc1;border:none;border-radius:5px;color:#fff;font-size:0.95rem;font-weight:700;cursor:pointer;margin-left:20px;}
+.btn-apostoli:active{background:#3a6baa;}
 
-    .idcard-header {
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 54px 16px 14px;
-      flex-shrink: 0;
-    }
-    .idcard-header-btn {
-      background:none; border:none; color:#fff; cursor:pointer;
-      font-size:1.3rem; padding:4px 8px; opacity:0.85;
-    }
-    .idcard-header-title { color:#fff; font-size:1rem; font-weight:700; letter-spacing:0.01em; }
+/* ════════════════════════════
+   SCREEN 5 — SECURITY CHECK
+════════════════════════════ */
+#s-security{align-items:center;justify-content:space-between;padding:58px 28px 34px;text-align:center;}
+.sec-logo{padding-bottom:4px;}
+.sec-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.sec-title{color:#fff;font-size:1.15rem;font-weight:700;}
+.sec-desc{color:rgba(255,255,255,0.7);font-size:0.92rem;line-height:1.6;max-width:270px;}
+.sec-icons{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0;}
+.sec-note{color:rgba(255,255,255,0.42);font-size:0.8rem;max-width:265px;line-height:1.55;}
+.btn-confirm{width:100%;padding:16px;background:linear-gradient(120deg,#1fc4ef,#1aadd8);border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;}
+.btn-confirm:active{filter:brightness(0.88);}
 
-    .idcard-body { flex:1; overflow-y:auto; padding:0 16px 30px; }
+/* ════════════════════════════
+   SCREEN 6 — HOME DASHBOARD
+════════════════════════════ */
+#s-home{
+  background-color:#001240;
+  background-image:
+    radial-gradient(ellipse 80% 55% at 50% 0%,rgba(0,80,200,0.38) 0%,transparent 68%),
+    radial-gradient(circle,rgba(100,160,255,0.045) 1px,transparent 1px);
+  background-size:100% 100%,22px 22px;
+  overflow:hidden;position:relative;
+}
 
-    /* Top info row: ID number + photo */
-    .idcard-top {
-      display:flex; align-items:flex-start; justify-content:space-between;
-      margin-bottom:16px; gap:12px;
-    }
-    .idcard-id-block {}
-    .idcard-id-label { font-size:0.72rem; color:rgba(255,255,255,0.6); font-weight:500; margin-bottom:3px; }
-    .idcard-id-number { font-size:1.55rem; font-weight:800; color:#fff; letter-spacing:0.04em; }
-    .idcard-issue { margin-top:6px; }
-    .idcard-issue-label { font-size:0.7rem; color:rgba(255,255,255,0.6); }
-    .idcard-issue-value { font-size:0.95rem; font-weight:700; color:#fff; }
+.home-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:58px 18px 14px;flex-shrink:0;
+}
+.home-hamburger{background:none;border:none;cursor:pointer;padding:2px;display:flex;flex-direction:column;gap:5px;}
+.home-hamburger span{display:block;width:22px;height:2.5px;background:#fff;border-radius:2px;}
+.home-govgr{display:flex;align-items:center;gap:8px;}
+.home-govgr-text{font-size:1.25rem;font-weight:800;color:#fff;}
+.home-govgr-text em{color:#4ec9ff;font-style:normal;}
+.home-right-icons{display:flex;align-items:center;gap:12px;}
+.maigov-btn{display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;}
+.maigov-text{color:#fff;font-size:0.85rem;font-weight:600;}
+.maigov-text em{color:#4ec9ff;font-style:normal;}
+.notif-btn{background:none;border:none;cursor:pointer;position:relative;}
+.notif-dot{position:absolute;top:-2px;right:-2px;width:9px;height:9px;background:#22c55e;border-radius:50%;border:1.5px solid #001240;}
 
-    .idcard-photo {
-      width:88px; height:110px; border-radius:6px;
-      background:#1a4a8a;
-      overflow:hidden; flex-shrink:0;
-      border:2px solid rgba(255,255,255,0.2);
-      display:flex; align-items:center; justify-content:center;
-    }
-    .idcard-photo img { width:100%; height:100%; object-fit:cover; }
-    .idcard-photo-placeholder {
-      display:flex; flex-direction:column; align-items:center; gap:4px;
-    }
+.home-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+.home-scroll::-webkit-scrollbar{display:none;}
 
-    /* Action buttons 2x2 */
-    .action-grid {
-      display:grid; grid-template-columns:1fr 1fr;
-      gap:8px; margin-bottom:20px;
-    }
-    .action-btn {
-      background:rgba(0,0,0,0.55); border:1px solid rgba(255,255,255,0.12);
-      border-radius:8px; padding:10px 10px;
-      color:#fff; font-size:0.78rem; font-weight:600;
-      display:flex; align-items:center; gap:8px;
-      cursor:pointer; text-align:left;
-    }
-    .action-btn:active { background:rgba(0,0,0,0.75); }
-    .action-btn svg { flex-shrink:0; }
+/* Carousel */
+.carousel-wrap{padding:0 0 0 18px;margin-bottom:10px;}
+.carousel{
+  display:flex;overflow-x:scroll;scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;gap:12px;padding-right:36px;
+}
+.carousel::-webkit-scrollbar{display:none;}
 
-    /* Field rows */
-    .id-field {
-      border-top:1px solid rgba(255,255,255,0.12);
-      padding:10px 0;
-    }
-    .id-field:last-child { border-bottom:1px solid rgba(255,255,255,0.12); }
-    .id-field-label { font-size:0.68rem; color:rgba(255,255,255,0.55); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:1px; }
-    .id-field-label-en { font-size:0.65rem; color:rgba(255,255,255,0.38); letter-spacing:0.04em; }
-    .id-field-value { font-size:1.2rem; font-weight:700; color:#fff; letter-spacing:0.01em; }
+.id-card-slide{
+  min-width:calc(100% - 36px);scroll-snap-align:start;flex-shrink:0;
+  border-radius:14px;overflow:hidden;cursor:pointer;
+  background:linear-gradient(145deg,#1b4fa5 0%,#2768cc 45%,#1a3f88 100%);
+  position:relative;
+}
+.id-card-slide::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='190'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1.2'%3E%3Cellipse cx='320' cy='95' rx='60' ry='32'/%3E%3Cellipse cx='320' cy='95' rx='95' ry='52'/%3E%3Cellipse cx='320' cy='95' rx='130' ry='72'/%3E%3Cellipse cx='320' cy='95' rx='165' ry='92'/%3E%3Cellipse cx='320' cy='95' rx='205' ry='112'/%3E%3Cellipse cx='320' cy='95' rx='250' ry='135'/%3E%3C/g%3E%3C/svg%3E") center/cover no-repeat;
+}
 
-    /* Document code footer */
-    .idcard-footer {
-      margin-top:20px;
-      border-top:1px solid rgba(255,255,255,0.12);
-      padding:14px 0 0;
-    }
-    .doc-code-row {
-      display:flex; align-items:center; justify-content:space-between; gap:8px;
-      margin-bottom:10px;
-    }
-    .doc-code-label { font-size:0.72rem; color:rgba(255,255,255,0.55); }
-    .doc-code-value { font-size:0.78rem; color:#fff; font-weight:600; word-break:break-all; flex:1; }
-    .copy-btn { background:none; border:none; cursor:pointer; padding:2px; opacity:0.7; }
-    .not-travel {
-      font-size:0.72rem; color:rgba(255,255,255,0.45);
-      text-align:center; line-height:1.5; padding-bottom:10px;
-    }
-  </style>
+.card-top{
+  padding:10px 14px 8px;
+  display:flex;align-items:flex-start;justify-content:space-between;
+  background:rgba(0,0,0,0.1);
+}
+.card-label{color:rgba(255,255,255,0.9);font-size:0.88rem;font-weight:600;}
+.card-photo{
+  width:74px;height:86px;border-radius:5px;
+  overflow:hidden;flex-shrink:0;
+  border:2px solid rgba(255,255,255,0.22);
+}
+.card-photo img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+.card-body{padding:10px 14px 16px;}
+.card-num{font-size:1.65rem;font-weight:800;color:#fff;letter-spacing:0.02em;}
+.card-date{font-size:0.83rem;color:rgba(255,255,255,0.68);margin-top:3px;}
+
+.license-slide{
+  min-width:calc(100% - 36px);scroll-snap-align:start;flex-shrink:0;
+  border-radius:14px;overflow:hidden;
+  background:linear-gradient(145deg,#b06830 0%,#d4874a 45%,#9d5a24 100%);
+  position:relative;
+}
+.license-slide::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='190'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1.2'%3E%3Cellipse cx='320' cy='95' rx='60' ry='32'/%3E%3Cellipse cx='320' cy='95' rx='95' ry='52'/%3E%3Cellipse cx='320' cy='95' rx='130' ry='72'/%3E%3Cellipse cx='320' cy='95' rx='165' ry='92'/%3E%3Cellipse cx='320' cy='95' rx='205' ry='112'/%3E%3C/g%3E%3C/svg%3E") center/cover no-repeat;
+}
+.license-top{padding:10px 14px 8px;background:rgba(0,0,0,0.1);}
+.license-label{color:rgba(255,255,255,0.9);font-size:0.88rem;font-weight:600;}
+.license-body{padding:10px 14px 16px;}
+.license-num{font-size:1.65rem;font-weight:800;color:#fff;letter-spacing:0.02em;}
+.license-exp{font-size:0.83rem;color:rgba(255,255,255,0.68);margin-top:3px;}
+
+.dots{display:flex;gap:7px;justify-content:center;margin-bottom:16px;}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.3);}
+.dot.on{background:#fff;}
+
+/* Personal number */
+.personal-bar{
+  margin:0 18px 18px;
+  border:1.5px solid rgba(255,255,255,0.24);border-radius:12px;
+  padding:14px 16px;display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,0.04);cursor:pointer;
+}
+.personal-bar-text{color:rgba(255,255,255,0.72);font-size:0.95rem;}
+
+/* Sections */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 18px 10px;}
+.sec-hdr-title{color:#fff;font-size:0.95rem;font-weight:700;}
+.sec-hdr-link{color:rgba(255,255,255,0.55);font-size:0.82rem;display:flex;align-items:center;gap:2px;}
+
+.wallet-row{display:flex;gap:10px;padding:0 18px 22px;}
+.wallet-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;}
+.w-box{width:100%;aspect-ratio:1;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;}
+.w-box-empty{width:100%;aspect-ratio:1;border-radius:13px;background:rgba(255,255,255,0.1);}
+.w-label{font-size:0.7rem;color:rgba(255,255,255,0.65);text-align:center;line-height:1.3;}
+
+.row-sep{height:1px;background:rgba(255,255,255,0.08);margin:0 18px 20px;}
+
+.thyrida-row{
+  display:flex;overflow-x:auto;gap:10px;
+  padding:0 18px 20px;-webkit-overflow-scrolling:touch;
+}
+.thyrida-row::-webkit-scrollbar{display:none;}
+.thyrida-card{
+  min-width:155px;flex-shrink:0;
+  border:1.5px solid rgba(255,255,255,0.14);border-radius:10px;padding:12px;
+  display:flex;flex-direction:column;justify-content:space-between;min-height:100px;
+  background:rgba(255,255,255,0.03);
+}
+.thyrida-text{color:rgba(255,255,255,0.88);font-size:0.79rem;line-height:1.4;font-weight:500;}
+.thyrida-date{color:rgba(255,255,255,0.42);font-size:0.71rem;margin-top:8px;}
+
+.epik-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px 22px;}
+.epik-card{
+  border:1.5px solid rgba(255,255,255,0.14);border-radius:10px;padding:12px;
+  background:rgba(255,255,255,0.03);
+}
+.epik-num{font-size:0.68rem;color:rgba(255,255,255,0.42);margin-bottom:5px;}
+.epik-text{color:rgba(255,255,255,0.88);font-size:0.78rem;line-height:1.4;}
+
+.home-footer{text-align:center;padding:6px 18px 34px;}
+.home-footer a{color:rgba(78,201,255,0.6);font-size:0.72rem;text-decoration:underline;}
+.home-footer p{color:rgba(255,255,255,0.28);font-size:0.68rem;margin-top:4px;}
+
+.fab{
+  position:absolute;bottom:30px;right:22px;
+  width:54px;height:54px;border-radius:50%;
+  background:linear-gradient(120deg,#1fc4ef,#1aadd8);
+  border:none;color:#fff;font-size:1.7rem;font-weight:300;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:0 4px 14px rgba(30,200,240,0.38);z-index:10;
+}
+.fab:active{filter:brightness(0.88);}
+
+/* ════════════════════════════
+   SCREEN 7 — ID CARD DETAIL
+════════════════════════════ */
+#s-idcard{
+  background-color:#003375;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 80% 30%,rgba(0,60,140,0.6) 0%,transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='1'%3E%3Cellipse cx='200' cy='200' rx='55' ry='28'/%3E%3Cellipse cx='200' cy='200' rx='85' ry='46'/%3E%3Cellipse cx='200' cy='200' rx='115' ry='64'/%3E%3Cellipse cx='200' cy='200' rx='148' ry='82'/%3E%3Cellipse cx='200' cy='200' rx='182' ry='100'/%3E%3Cellipse cx='200' cy='200' rx='218' ry='120'/%3E%3Cellipse cx='200' cy='200' rx='256' ry='142'/%3E%3Cellipse cx='200' cy='200' rx='296' ry='164'/%3E%3Cellipse cx='200' cy='200' rx='340' ry='188'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:100% 100%,400px 400px;
+  background-position:center,60% 20%;
+  overflow:hidden;
+}
+
+.idc-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:58px 14px 10px;flex-shrink:0;
+}
+.idc-back{background:none;border:none;color:#fff;cursor:pointer;font-size:1.3rem;padding:4px 8px;opacity:0.85;}
+.idc-title{color:#fff;font-size:1rem;font-weight:700;}
+.idc-more{background:none;border:none;color:#fff;cursor:pointer;font-size:1.3rem;padding:4px 8px;opacity:0.85;}
+
+.idc-date{color:rgba(255,255,255,0.65);font-size:0.85rem;padding:0 16px 12px;flex-shrink:0;}
+
+.idc-body{flex:1;overflow-y:auto;padding:0 16px 30px;}
+.idc-body::-webkit-scrollbar{display:none;}
+
+.idc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:10px;}
+.idc-num{font-size:1.55rem;font-weight:800;color:#fff;letter-spacing:0.04em;margin-top:2px;}
+.idc-issue{font-size:0.88rem;color:rgba(255,255,255,0.6);margin-top:6px;}
+
+.idc-photo{
+  width:92px;height:110px;border-radius:6px;
+  overflow:hidden;flex-shrink:0;
+  border:2px solid rgba(255,255,255,0.22);
+}
+.idc-photo img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+
+.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
+.act-btn{
+  background:rgba(0,0,0,0.48);border:1px solid rgba(255,255,255,0.14);
+  border-radius:10px;padding:11px 12px;
+  color:#fff;font-size:0.79rem;font-weight:600;
+  display:flex;align-items:center;gap:9px;cursor:pointer;text-align:left;
+}
+.act-btn:active{background:rgba(0,0,0,0.68);}
+
+.idf{border-top:1px solid rgba(255,255,255,0.12);padding:11px 0;}
+.idf:last-child{border-bottom:1px solid rgba(255,255,255,0.12);}
+.idf-lbl{font-size:0.67rem;color:rgba(255,255,255,0.5);letter-spacing:0.07em;text-transform:uppercase;}
+.idf-lbl-en{font-size:0.64rem;color:rgba(255,255,255,0.34);letter-spacing:0.04em;}
+.idf-val{font-size:1.2rem;font-weight:700;color:#fff;}
+.idf-val-en{font-size:0.95rem;font-weight:500;color:rgba(255,255,255,0.68);}
+
+.idc-footer{margin-top:20px;border-top:1px solid rgba(255,255,255,0.12);padding:14px 0 0;}
+.doc-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+.doc-lbl{font-size:0.72rem;color:rgba(255,255,255,0.5);}
+.doc-val{font-size:0.78rem;color:#fff;font-weight:600;word-break:break-all;flex:1;}
+.copy-btn{background:none;border:none;cursor:pointer;padding:2px;opacity:0.7;}
+.not-travel{font-size:0.72rem;color:rgba(255,255,255,0.4);text-align:center;line-height:1.5;padding-bottom:10px;}
+</style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
+<!-- ════════════════════════════
      SCREEN 1 — MAIN
-══════════════════════════════════════ -->
+════════════════════════════ -->
 <div id="s-main" class="screen active dark-bg">
-
-  <div class="govgr-logo">
-    <div class="govgr-logo-row">
-      <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+  <div class="main-logo">
+    <div class="main-logo-row">
+      <svg class="globe-svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
         <circle cx="15" cy="15" r="13" stroke="#4ec9ff" stroke-width="1.8"/>
         <path d="M15 2C15 2 9.5 7.5 9.5 15C9.5 22.5 15 28 15 28" stroke="#4ec9ff" stroke-width="1.4"/>
         <path d="M15 2C15 2 20.5 7.5 20.5 15C20.5 22.5 15 28 15 28" stroke="#4ec9ff" stroke-width="1.4"/>
@@ -277,25 +415,27 @@
         <path d="M3.5 9.5H26.5" stroke="#4ec9ff" stroke-width="1.1"/>
         <path d="M3.5 20.5H26.5" stroke="#4ec9ff" stroke-width="1.1"/>
       </svg>
-      <span class="gov-name">gov<span>.gr</span></span>
+      <span class="main-logo-name">gov<span>.gr</span></span>
     </div>
-    <span class="wallet-label">wallet</span>
+    <span class="main-wallet">wallet</span>
   </div>
 
   <div class="qr-frame"><div class="qr-bl"></div></div>
 
   <div class="btn-group">
-    <button class="btn-filled" onclick="nav('s-provider')">
-      <span>Σύνδεση με κωδικούς TaxisNet</span>
-      <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-        <rect x="1.5" y="1.5" width="27" height="27" rx="6.5" stroke="white" stroke-width="1.6"/>
-        <circle cx="10.5" cy="13" r="1.8" fill="white"/>
-        <circle cx="19.5" cy="13" r="1.8" fill="white"/>
-        <path d="M10.5 19.5C10.5 19.5 12.3 22 15 22C17.7 22 19.5 19.5 19.5 19.5" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
-        <path d="M7 7.5L10.5 10" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
-        <path d="M23 7.5L19.5 10" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
-      </svg>
-    </button>
+    <div class="main-btn-row">
+      <button class="btn-teal" onclick="nav('s-provider')">Σύνδεση με κωδικούς TaxisNet</button>
+      <button class="btn-faceid">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect x="1.5" y="1.5" width="25" height="25" rx="6" stroke="rgba(78,201,255,0.7)" stroke-width="1.5"/>
+          <circle cx="9.5" cy="12.5" r="1.8" fill="white"/>
+          <circle cx="18.5" cy="12.5" r="1.8" fill="white"/>
+          <path d="M9.5 18.5C9.5 18.5 11.3 21 14 21C16.7 21 18.5 18.5 18.5 18.5" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M6.5 7L9.5 9.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M21.5 7L18.5 9.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
 
     <button class="btn-outline">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -310,45 +450,53 @@
         <rect x="11.5" y="15.5" width="2.5" height="2.5" fill="white"/>
         <rect x="15.5" y="15.5" width="2.5" height="2.5" fill="white"/>
       </svg>
-      <span>Έλεγχος Εγγράφου</span>
+      Έλεγχος Εγγράφου
     </button>
 
     <button class="btn-outline">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <circle cx="10" cy="10" r="8.5" stroke="white" stroke-width="1.4" stroke-dasharray="3.5 2.5"/>
-        <circle cx="10" cy="10" r="3.5" fill="rgba(255,255,255,0.55)"/>
-        <circle cx="10" cy="10" r="1.2" fill="white"/>
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <circle cx="11" cy="11" r="9.5" stroke="white" stroke-width="1.5"/>
+        <text x="11" y="15" text-anchor="middle" font-size="8" font-weight="800" fill="white" font-family="Arial">18+</text>
       </svg>
-      <span>Επαλήθευση Ηλικίας</span>
+      Επαλήθευση Ηλικίας
     </button>
 
     <div class="divider">Non Greek Residents</div>
 
-    <button class="btn-outline" style="justify-content:center; font-weight:600;">Event Tickets</button>
+    <button class="btn-outline" style="justify-content:center;font-weight:700;">Event Tickets</button>
   </div>
 
   <div class="bottom-gov">
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <circle cx="9" cy="9" r="7.5" stroke="rgba(255,255,255,0.42)" stroke-width="1.3"/>
-      <path d="M9 1.5C9 1.5 6 4.5 6 9C6 13.5 9 16.5 9 16.5" stroke="rgba(255,255,255,0.42)" stroke-width="1"/>
-      <path d="M9 1.5C9 1.5 12 4.5 12 9C12 13.5 9 16.5 9 16.5" stroke="rgba(255,255,255,0.42)" stroke-width="1"/>
-      <path d="M1.5 9H16.5" stroke="rgba(255,255,255,0.42)" stroke-width="1"/>
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <circle cx="11" cy="11" r="9.5" stroke="white" stroke-width="1.5"/>
+      <path d="M11 1.5C11 1.5 7.5 5 7.5 11C7.5 17 11 20.5 11 20.5" stroke="white" stroke-width="1.1"/>
+      <path d="M11 1.5C11 1.5 14.5 5 14.5 11C14.5 17 11 20.5 11 20.5" stroke="white" stroke-width="1.1"/>
+      <path d="M1.5 11H20.5" stroke="white" stroke-width="1.1"/>
+      <path d="M2.5 7H19.5" stroke="white" stroke-width="0.9"/>
+      <path d="M2.5 15H19.5" stroke="white" stroke-width="0.9"/>
     </svg>
-    <span>govgr</span>
+    <span class="bottom-gov-name">gov<span>.gr</span></span>
   </div>
 </div>
 
 
-<!-- ══════════════════════════════════════
-     SCREEN 2 — PROVIDER SELECTION
-══════════════════════════════════════ -->
+<!-- ════════════════════════════
+     SCREEN 2 — PROVIDER
+════════════════════════════ -->
 <div id="s-provider" class="screen">
   <div class="browser-bar">
-    <button class="x-btn" onclick="nav('s-main')">✕</button>
-    <span class="url">auth.services.gov.gr</span>
+    <button class="browser-x" onclick="nav('s-main')">✕</button>
+    <span class="browser-url">auth.services.gov.gr</span>
+    <button class="browser-menu">
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+        <rect y="0" width="16" height="2" rx="1" fill="#444"/>
+        <rect y="5" width="16" height="2" rx="1" fill="#444"/>
+        <rect y="10" width="16" height="2" rx="1" fill="#444"/>
+      </svg>
+    </button>
   </div>
-  <div class="prov-header">
-    <div class="prov-header-logo">
+  <div class="prov-hdr">
+    <div class="prov-hdr-logo">
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
         <circle cx="11" cy="11" r="9.5" stroke="white" stroke-width="1.5"/>
         <path d="M11 1.5C11 1.5 7.5 5 7.5 11C7.5 17 11 20.5 11 20.5" stroke="white" stroke-width="1.1"/>
@@ -357,67 +505,86 @@
       </svg>
       gov.gr
     </div>
-    <div style="flex:1"></div>
-    <span class="prov-header-title">Επιλογή φορέα</span>
+    <span class="prov-hdr-title">Επιλογή φορέα</span>
   </div>
   <div class="prov-body">
     <h2>Σε ποιον φορέα έχετε λογαριασμό;</h2>
 
     <div class="prov-card">
-      <div class="prov-card-top">
-        <div class="prov-card-logo-box">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <rect width="36" height="36" rx="4" fill="#e8edf7"/>
-            <path d="M8 10L18 6L28 10V20C28 26 18 30 18 30C18 30 8 26 8 20V10Z" stroke="#003375" stroke-width="1.5" fill="none"/>
-            <path d="M13 18L16.5 21.5L23 15" stroke="#003375" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="prov-card-text">Γενική Γραμματεία<br>Πληροφοριακών<br>Συστημάτων &amp;<br>Ψηφιακής Διακυβέρνησης</div>
+      <div class="prov-logo-area">
+        <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+          <rect width="46" height="46" rx="4" fill="#fdf0e8"/>
+          <polygon points="23,4 42,23 23,42 4,23" fill="none" stroke="#e07020" stroke-width="2.2"/>
+          <polygon points="23,10 36,23 23,36 10,23" fill="none" stroke="#e07020" stroke-width="1.4"/>
+          <text x="23" y="26" text-anchor="middle" font-size="6" font-weight="800" fill="#e07020" font-family="Arial">ΓΓΠΣΨΔ</text>
+        </svg>
+        <div class="prov-org-text">Γενική Γραμματεία<br>Πληροφοριακών<br>Συστημάτων &amp;<br>Ψηφιακής Διακυβέρνησης</div>
       </div>
-      <button class="btn-green" onclick="nav('s-login')">ΓΓΠΣΨΔ (Κωδικοί Taxisnet)</button>
+      <button class="btn-green" onclick="nav('s-login')">ΓΓΠΣΨΔ<br>(Κωδικοί Taxisnet)</button>
     </div>
 
     <div class="prov-card">
       <div style="margin-bottom:14px;">
         <div class="nbg-name">ΕΘΝΙΚΗ</div>
-        <div class="nbg-sub"><span class="nbg-ball"></span> ΤΡΑΠΕΖΑ</div>
+        <div class="nbg-bottom"><span class="nbg-dot"></span><span>ΤΡΑΠΕΖΑ</span></div>
       </div>
-      <button class="btn-blue-bank">Εθνική Τράπεζα</button>
+      <button class="btn-bank">Εθνική Τράπεζα</button>
     </div>
 
     <div class="prov-card">
       <div style="margin-bottom:14px;">
-        <div class="piraeus-name">/// Piraeus</div>
-        <div style="font-size:0.7rem; color:#555; margin-top:2px;">Τράπεζα Πειραιώς</div>
+        <div style="font-size:1rem;font-weight:700;color:#00397a;font-style:italic;">/// Piraeus</div>
+        <div style="font-size:0.72rem;color:#555;margin-top:2px;">Τράπεζα Πειραιώς</div>
       </div>
-      <button class="btn-blue-bank" style="background:#00397a;">Τράπεζα Πειραιώς</button>
+      <button class="btn-bank-blue">Τράπεζα Πειραιώς</button>
     </div>
   </div>
 </div>
 
 
-<!-- ══════════════════════════════════════
+<!-- ════════════════════════════
      SCREEN 3 — TAXISNET LOGIN
-══════════════════════════════════════ -->
+════════════════════════════ -->
 <div id="s-login" class="screen">
-  <div class="browser-bar">
-    <button class="x-btn" onclick="nav('s-provider')">✕</button>
-    <span class="url">oauth2.gsis.gr</span>
+  <div class="browser-bar-light">
+    <button class="browser-x" onclick="nav('s-provider')">✕</button>
+    <span class="browser-url">oauth2.gsis.gr</span>
+    <button class="browser-menu">
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+        <rect y="0" width="16" height="2" rx="1" fill="#444"/>
+        <rect y="5" width="16" height="2" rx="1" fill="#444"/>
+        <rect y="10" width="16" height="2" rx="1" fill="#444"/>
+      </svg>
+    </button>
   </div>
-  <div class="login-inner">
+  <div class="login-scroll">
     <div class="login-card">
-      <div class="login-card-logos">
-        <div class="org">Γενική Γραμματεία<br>Πληροφοριακών Συστημάτων<br>&amp; Ψηφιακής Διακυβέρνησης</div>
-        <div style="width:1px; height:40px; background:#eee;"></div>
-        <div class="org" style="text-align:right;">ΕΛΛΗΝΙΚΗ ΔΗΜΟΚΡΑΤΙΑ<br>Υπουργείο Ψηφιακής<br>Διακυβέρνησης</div>
+      <div class="login-logos">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <svg width="36" height="36" viewBox="0 0 46 46" fill="none">
+            <polygon points="23,4 42,23 23,42 4,23" fill="none" stroke="#e07020" stroke-width="2.2"/>
+            <polygon points="23,10 36,23 23,36 10,23" fill="none" stroke="#e07020" stroke-width="1.4"/>
+            <text x="23" y="26" text-anchor="middle" font-size="6" font-weight="800" fill="#e07020" font-family="Arial">ΓΓΠΣΨΔ</text>
+          </svg>
+          <div class="org-left">Γενική Γραμματεία<br>Πληροφοριακών Συστημάτων<br>&amp; Ψηφιακής Διακυβέρνησης</div>
+        </div>
+        <div class="logo-divider"></div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div class="org-right">ΕΛΛΗΝΙΚΗ ΔΗΜΟΚΡΑΤΙΑ<br>Υπουργείο Ψηφιακής<br>Διακυβέρνησης</div>
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="16" stroke="#003375" stroke-width="1.5" fill="#e8edf7"/>
+            <text x="18" y="22" text-anchor="middle" font-size="9" fill="#003375" font-weight="700" font-family="Arial">ΕΛ</text>
+          </svg>
+        </div>
       </div>
-      <div class="login-card-header">
-        <span>Αυθεντικοποίηση Χρήστη</span>
-        <a>English</a>
+      <div class="login-hdr">
+        <span class="login-hdr-text">Αυθεντικοποίηση Χρήστη</span>
+        <span class="login-hdr-en">English</span>
       </div>
-      <div class="login-card-body">
+      <div class="login-body">
         <h2>Σύνδεση</h2>
         <p>Παρακαλώ εισάγετε τους κωδικούς σας στο <strong>TaxisNet</strong> για να συνδεθείτε.</p>
+        <div class="login-sep"></div>
         <div class="field">
           <label>Χρήστης:</label>
           <input type="text" autocomplete="username">
@@ -426,22 +593,75 @@
           <label>Κωδικός:</label>
           <input type="password" autocomplete="current-password">
         </div>
-        <button class="btn-taxisnet" onclick="nav('s-security')">Σύνδεση</button>
-        <div class="login-footnote">Κέντρο Διαλειτουργικότητας (ΚΕ.Δ.) Υπουργείου<br>Ψηφιακής Διακυβέρνησης</div>
+        <button class="btn-syndesi" onclick="nav('s-consent')">Σύνδεση</button>
+        <div class="login-note">Κέντρο Διαλειτουργικότητας (ΚΕ.Δ.) Υπουργείου<br>Ψηφιακής Διακυβέρνησης</div>
       </div>
     </div>
   </div>
 </div>
 
 
-<!-- ══════════════════════════════════════
-     SCREEN 4 — SECURITY CHECK
-══════════════════════════════════════ -->
-<div id="s-security" class="screen dark-bg">
+<!-- ════════════════════════════
+     SCREEN 4 — CONSENT
+════════════════════════════ -->
+<div id="s-consent" class="screen">
+  <div class="browser-bar-light">
+    <button class="browser-x" onclick="nav('s-login')">✕</button>
+    <span class="browser-url">oauth2.gsis.gr</span>
+    <button class="browser-menu">
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+        <rect y="0" width="16" height="2" rx="1" fill="#444"/>
+        <rect y="5" width="16" height="2" rx="1" fill="#444"/>
+        <rect y="10" width="16" height="2" rx="1" fill="#444"/>
+      </svg>
+    </button>
+  </div>
+  <div class="login-scroll">
+    <div class="login-card">
+      <div class="login-logos">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <svg width="36" height="36" viewBox="0 0 46 46" fill="none">
+            <polygon points="23,4 42,23 23,42 4,23" fill="none" stroke="#e07020" stroke-width="2.2"/>
+            <polygon points="23,10 36,23 23,36 10,23" fill="none" stroke="#e07020" stroke-width="1.4"/>
+            <text x="23" y="26" text-anchor="middle" font-size="6" font-weight="800" fill="#e07020" font-family="Arial">ΓΓΠΣΨΔ</text>
+          </svg>
+          <div class="org-left">Γενική Γραμματεία<br>Πληροφοριακών Συστημάτων<br>&amp; Ψηφιακής Διακυβέρνησης</div>
+        </div>
+        <div class="logo-divider"></div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div class="org-right">ΕΛΛΗΝΙΚΗ ΔΗΜΟΚΡΑΤΙΑ<br>Υπουργείο Ψηφιακής<br>Διακυβέρνησης</div>
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="16" stroke="#003375" stroke-width="1.5" fill="#e8edf7"/>
+            <text x="18" y="22" text-anchor="middle" font-size="9" fill="#003375" font-weight="700" font-family="Arial">ΕΛ</text>
+          </svg>
+        </div>
+      </div>
+      <div class="login-hdr">
+        <span class="login-hdr-text">Αυθεντικοποίηση Χρήστη</span>
+        <span class="login-hdr-en">English</span>
+      </div>
+      <div class="consent-text-body">
+        Σας ενημερώνουμε ότι για το σκοπό της ηλεκτρονικής ταυτοποίησής σας, η εφαρμογή <strong>Εφαρμογές Ενιαίας Ψηφιακής Πύλης</strong> θα αποκτήσει πρόσβαση στα βασικά στοιχεία Μητρώου (ΑΦΜ, Όνομα, Επώνυμο, Πατρώνυμο, Μητρώνυμο, Έτος Γέννησης) που παρέχονται από το φορολογικό μητρώο του ΥΠΟΥΡΓΕΙΟΥ ΟΙΚΟΝΟΜΙΚΩΝ που διαχειρίζεται η Α.Α.Δ.Ε.
+      </div>
+      <div class="radio-group">
+        <label class="radio-opt"><span class="radio-circle"></span>Επιστροφή</label>
+        <label class="radio-opt"><span class="radio-circle on"></span>Συνέχεια</label>
+      </div>
+      <div style="padding-bottom:20px;">
+        <button class="btn-apostoli" onclick="nav('s-security')">Αποστολή</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <div class="govgr-logo" style="padding-top:64px;">
-    <div class="govgr-logo-row">
-      <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+
+<!-- ════════════════════════════
+     SCREEN 5 — SECURITY CHECK
+════════════════════════════ -->
+<div id="s-security" class="screen dark-bg">
+  <div class="sec-logo" style="padding-top:58px;display:flex;flex-direction:column;align-items:center;gap:3px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <svg width="26" height="26" viewBox="0 0 30 30" fill="none">
         <circle cx="15" cy="15" r="13" stroke="#4ec9ff" stroke-width="1.8"/>
         <path d="M15 2C15 2 9.5 7.5 9.5 15C9.5 22.5 15 28 15 28" stroke="#4ec9ff" stroke-width="1.4"/>
         <path d="M15 2C15 2 20.5 7.5 20.5 15C20.5 22.5 15 28 15 28" stroke="#4ec9ff" stroke-width="1.4"/>
@@ -449,16 +669,17 @@
         <path d="M3.5 9.5H26.5" stroke="#4ec9ff" stroke-width="1.1"/>
         <path d="M3.5 20.5H26.5" stroke="#4ec9ff" stroke-width="1.1"/>
       </svg>
-      <span class="gov-name">gov<span>.gr</span></span>
+      <span style="font-size:1.45rem;font-weight:800;color:#fff;">gov<span style="color:#4ec9ff;">.gr</span></span>
     </div>
-    <span class="wallet-label">wallet</span>
+    <span style="font-size:0.95rem;color:#fff;letter-spacing:0.18em;">wallet</span>
   </div>
 
   <div class="sec-body">
     <div class="sec-title">Έλεγχος Ασφαλείας</div>
     <div class="sec-desc">Για την προστασία των δεδομένων σας παρακαλούμε επιβεβαιώστε την ταυτότητά σας.</div>
     <div class="sec-icons">
-      <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
+      <!-- Fingerprint -->
+      <svg width="96" height="96" viewBox="0 0 88 88" fill="none">
         <path d="M44 13C30.2 13 19 24.2 19 38" stroke="#4ec9ff" stroke-width="2.8" stroke-linecap="round"/>
         <path d="M44 13C57.8 13 69 24.2 69 38" stroke="#4ec9ff" stroke-width="2.8" stroke-linecap="round"/>
         <path d="M25 50C24.2 46.2 24 42.2 24 38C24 26.95 33 18 44 18C55 18 64 26.95 64 38C64 42.2 63.8 46.2 63 50" stroke="#4ec9ff" stroke-width="2.8" stroke-linecap="round"/>
@@ -466,77 +687,258 @@
         <path d="M37 70C35.5 66.5 35 63 35 61C35 54.4 39.1 50 44 50C48.9 50 53 54.4 53 61C53 63 52.5 66.5 51 70" stroke="#4ec9ff" stroke-width="2.8" stroke-linecap="round"/>
         <path d="M44 50V75" stroke="#4ec9ff" stroke-width="2.8" stroke-linecap="round"/>
       </svg>
-      <svg width="62" height="62" viewBox="0 0 62 62" fill="none">
-        <path d="M10 24V13C10 11.3 11.3 10 13 10H24" stroke="#4ec9ff" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M52 24V13C52 11.3 50.7 10 49 10H38" stroke="#4ec9ff" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M10 38V49C10 50.7 11.3 52 13 52H24" stroke="#4ec9ff" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M52 38V49C52 50.7 50.7 52 49 52H38" stroke="#4ec9ff" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="22" cy="27" r="2.5" fill="#4ec9ff"/>
-        <circle cx="40" cy="27" r="2.5" fill="#4ec9ff"/>
-        <path d="M22 38C22 38 25 42 31 42C37 42 40 38 40 38" stroke="#4ec9ff" stroke-width="2.2" stroke-linecap="round"/>
-        <path d="M31 27V34" stroke="#4ec9ff" stroke-width="1.8" stroke-linecap="round"/>
-      </svg>
+      <!-- Face ID — shifted slightly right -->
+      <div style="align-self:flex-end;margin-right:12px;">
+        <svg width="66" height="66" viewBox="0 0 62 62" fill="none">
+          <path d="M10 24V13C10 11.3 11.3 10 13 10H24" stroke="#4ec9ff" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M52 24V13C52 11.3 50.7 10 49 10H38" stroke="#4ec9ff" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M10 38V49C10 50.7 11.3 52 13 52H24" stroke="#4ec9ff" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M52 38V49C52 50.7 50.7 52 49 52H38" stroke="#4ec9ff" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="22" cy="27" r="2.5" fill="#4ec9ff"/>
+          <circle cx="40" cy="27" r="2.5" fill="#4ec9ff"/>
+          <path d="M22 38C22 38 25 42 31 42C37 42 40 38 40 38" stroke="#4ec9ff" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M31 27V34" stroke="#4ec9ff" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
     </div>
     <div class="sec-note">Ενδέχεται να σας ζητηθεί νέος έλεγχος ασφαλείας κατά την χρήση της εφαρμογής.</div>
   </div>
 
-  <div style="padding:0 28px 36px; width:100%;">
-    <button class="btn-confirm" onclick="nav('s-idcard')">Επιβεβαίωση</button>
+  <div style="padding:0 28px 34px;width:100%;">
+    <button class="btn-confirm" onclick="nav('s-home')">Επιβεβαίωση</button>
   </div>
 </div>
 
 
-<!-- ══════════════════════════════════════
-     SCREEN 5 — IDENTITY CARD
-══════════════════════════════════════ -->
-<div id="s-idcard" class="screen">
-
-  <div class="idcard-header">
-    <button class="idcard-header-btn" onclick="nav('s-main')">&#8592;</button>
-    <span class="idcard-header-title">&#916;&#949;&#955;&#964;&#943;&#959; &#932;&#945;&#965;&#964;&#972;&#964;&#951;&#964;&#945;&#962;</span>
-    <button class="idcard-header-btn">&#8942;</button>
+<!-- ════════════════════════════
+     SCREEN 6 — HOME DASHBOARD
+════════════════════════════ -->
+<div id="s-home" class="screen">
+  <div class="home-bar">
+    <button class="home-hamburger">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="home-govgr">
+      <svg width="26" height="26" viewBox="0 0 30 30" fill="none">
+        <circle cx="15" cy="15" r="13" stroke="white" stroke-width="1.8"/>
+        <path d="M15 2C15 2 9.5 7.5 9.5 15C9.5 22.5 15 28 15 28" stroke="white" stroke-width="1.4"/>
+        <path d="M15 2C15 2 20.5 7.5 20.5 15C20.5 22.5 15 28 15 28" stroke="white" stroke-width="1.4"/>
+        <path d="M2 15H28" stroke="white" stroke-width="1.4"/>
+        <path d="M3.5 9.5H26.5" stroke="white" stroke-width="1.1"/>
+        <path d="M3.5 20.5H26.5" stroke="white" stroke-width="1.1"/>
+      </svg>
+      <span class="home-govgr-text">gov<em>.gr</em></span>
+    </div>
+    <div class="home-right-icons">
+      <button class="maigov-btn">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+          <circle cx="13" cy="13" r="12" fill="#1a4fa5"/>
+          <circle cx="13" cy="10" r="4" fill="#4ec9ff"/>
+          <circle cx="10" cy="9" r="1.2" fill="white"/>
+          <circle cx="16" cy="9" r="1.2" fill="white"/>
+          <path d="M10 12.5C10 12.5 11.2 14 13 14C14.8 14 16 12.5 16 12.5" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+          <rect x="8" y="16" width="10" height="7" rx="2" fill="#4ec9ff"/>
+          <rect x="10" y="14" width="6" height="4" rx="1" fill="#4ec9ff"/>
+        </svg>
+        <span class="maigov-text">mA<em>i</em>gov</span>
+      </button>
+      <button class="notif-btn">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+          <rect x="3" y="6" width="20" height="15" rx="3" stroke="white" stroke-width="1.6" fill="none"/>
+          <path d="M3 10L13 16L23 10" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <span class="notif-dot"></span>
+      </button>
+    </div>
   </div>
 
-  <div class="idcard-body">
-
-    <div class="idcard-top">
-      <div class="idcard-id-block">
-        <div class="idcard-id-label">&#913;&#961;&#953;&#952;&#956;&#972;&#962; &#932;&#945;&#965;&#964;&#972;&#964;&#951;&#964;&#945;&#962;:</div>
-        <div class="idcard-id-number">&#913;01279163</div>
-        <div class="idcard-issue">
-          <div class="idcard-issue-label">&#919;&#956;. &#904;&#954;&#948;&#959;&#963;&#951;&#962;:</div>
-          <div class="idcard-issue-value">03/01/2025</div>
+  <div class="home-scroll">
+    <!-- Card carousel -->
+    <div class="carousel-wrap">
+      <div class="carousel" id="carousel">
+        <!-- Card 1: ID -->
+        <div class="id-card-slide" onclick="nav('s-idcard')">
+          <div class="card-top">
+            <span class="card-label">Δελτίο Ταυτότητας</span>
+            <div class="card-photo">
+              <img src="Info/face.jpg" alt="photo" onerror="this.parentElement.style.background='#2a5fa5'">
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-num">Α01279163</div>
+            <div class="card-date">Ημ. Έκδοσης: 03/01/2025</div>
+          </div>
         </div>
-      </div>
-      <div class="idcard-photo">
-        <!-- Photo placeholder — replace src with actual photo if available -->
-        <div class="idcard-photo-placeholder">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <circle cx="18" cy="14" r="8" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-            <path d="M4 34C4 26.27 10.27 20 18 20C25.73 20 32 26.27 32 34" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
+        <!-- Card 2: License -->
+        <div class="license-slide">
+          <div class="license-top">
+            <span class="license-label">Άδεια Οδήγησης</span>
+          </div>
+          <div class="card-body">
+            <div class="license-num">580226864</div>
+            <div class="license-exp">Ισχύς μέχρι: 19/07/2039</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Action buttons 2x2 -->
-    <div class="action-grid">
-      <button class="action-btn">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <rect x="2" y="4" width="16" height="12" rx="2" stroke="white" stroke-width="1.3"/>
-          <path d="M7 10L9.5 12.5L13 8" stroke="#30d158" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Dots -->
+    <div class="dots">
+      <span class="dot on" id="dot0"></span>
+      <span class="dot" id="dot1"></span>
+    </div>
+
+    <!-- Personal number -->
+    <div class="personal-bar">
+      <span class="personal-bar-text">Προσωπικός Αριθμός</span>
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <ellipse cx="11" cy="11" rx="9" ry="6" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+        <circle cx="11" cy="11" r="2.5" fill="rgba(255,255,255,0.6)"/>
+      </svg>
+    </div>
+
+    <!-- My Wallet -->
+    <div class="sec-hdr">
+      <span class="sec-hdr-title">My wallet</span>
+      <span class="sec-hdr-link">Προβολή <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1L7 6.5L1 12" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+    </div>
+    <div class="wallet-row">
+      <div class="wallet-item">
+        <div class="w-box">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect x="4" y="8" width="24" height="16" rx="3" stroke="#003375" stroke-width="1.8"/>
+            <rect x="4" y="12" width="24" height="4" fill="#003375"/>
+            <rect x="7" y="18" width="8" height="2" rx="1" fill="#003375"/>
+          </svg>
+        </div>
+        <span class="w-label">Εισιτήρια</span>
+      </div>
+      <div class="wallet-item">
+        <div class="w-box">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect x="5" y="7" width="22" height="18" rx="3" stroke="#003375" stroke-width="1.8"/>
+            <circle cx="12" cy="15" r="3.5" stroke="#003375" stroke-width="1.5"/>
+            <rect x="17" y="12" width="7" height="1.8" rx="0.9" fill="#003375"/>
+            <rect x="17" y="15.5" width="5" height="1.8" rx="0.9" fill="#003375"/>
+            <rect x="7" y="20" width="18" height="1.5" rx="0.7" fill="#1a6fd4"/>
+          </svg>
+        </div>
+        <span class="w-label">Ακαδημαϊκή<br>Ταυτότητα</span>
+      </div>
+      <div class="wallet-item">
+        <div class="w-box-empty"></div>
+        <span class="w-label"> </span>
+      </div>
+      <div class="wallet-item">
+        <div class="w-box-empty"></div>
+        <span class="w-label"> </span>
+      </div>
+    </div>
+
+    <div class="row-sep"></div>
+
+    <!-- Θυρίδα μου -->
+    <div class="sec-hdr">
+      <span class="sec-hdr-title">Η Θυρίδα μου</span>
+      <span class="sec-hdr-link">Προβολή <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1L7 6.5L1 12" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+    </div>
+    <div class="thyrida-row">
+      <div class="thyrida-card">
+        <div class="thyrida-text">Αυτεπάγγελτη αναζήτηση δικαιολογητικού από Δημόσιο Υπάλληλο</div>
+        <div class="thyrida-date">27/10/2025, 11:25</div>
+      </div>
+      <div class="thyrida-card">
+        <div class="thyrida-text">Παράταση συμμετοχής στην αξιολόγηση δημόσιων υπηρεσιών</div>
+        <div class="thyrida-date">28/05/2025, 15:14</div>
+      </div>
+      <div class="thyrida-card">
+        <div class="thyrida-text">Αξιολογήστε Υπηρεσίες της Δημόσιας Διοίκησης</div>
+        <div class="thyrida-date">20/05/2025, 10:35</div>
+      </div>
+      <div class="thyrida-card">
+        <div class="thyrida-text">Υπεύθυνη Δήλωση</div>
+        <div class="thyrida-date">05/10/2025, 15:00</div>
+      </div>
+    </div>
+
+    <!-- Επίκαιρες υπηρεσίες -->
+    <div class="sec-hdr">
+      <span class="sec-hdr-title">Επίκαιρες υπηρεσίες</span>
+      <span class="sec-hdr-link">Όλες οι υπηρεσίες <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1L7 6.5L1 12" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+    </div>
+    <div class="epik-grid">
+      <div class="epik-card">
+        <div class="epik-num">1.</div>
+        <div class="epik-text">Προσωπικός Αριθμός / Επιβεβαίωση και διόρθωση στοιχείων στα μητρώα</div>
+      </div>
+      <div class="epik-card">
+        <div class="epik-num">2.</div>
+        <div class="epik-text">Βεβαίωση Επιλεξιμότητας στο πρόγραμμα «Σπίτι μου ΙΙ»</div>
+      </div>
+      <div class="epik-card">
+        <div class="epik-num">3.</div>
+        <div class="epik-text">Υπεύθυνη Δήλωση / Εξουσιοδότηση / Γνήσιο Υπογραφής</div>
+      </div>
+      <div class="epik-card">
+        <div class="epik-num">4.</div>
+        <div class="epik-text">Δημιουργία ηλεκτρονικής επισημείωσης της Χάγης (e-apostille)</div>
+      </div>
+    </div>
+
+    <div class="home-footer">
+      <a>Πολιτική Προστασίας Προσωπικών Δεδομένων</a>
+      <p>Έκδοση εφαρμογής : 3.1.5 (102)</p>
+    </div>
+  </div>
+
+  <button class="fab">+</button>
+</div>
+
+
+<!-- ════════════════════════════
+     SCREEN 7 — ID CARD DETAIL
+════════════════════════════ -->
+<div id="s-idcard" class="screen">
+  <div class="idc-bar">
+    <button class="idc-back" onclick="nav('s-home')">&#8592;</button>
+    <span class="idc-title">Δελτίο Ταυτότητας</span>
+    <button class="idc-more">&#8942;</button>
+  </div>
+  <div class="idc-date">03/01/2025</div>
+
+  <div class="idc-body">
+    <div class="idc-top">
+      <div>
+        <div class="idc-num">Α01279163</div>
+        <div class="idc-issue">Ημ. Έκδοσης: 03/01/2025</div>
+      </div>
+      <div class="idc-photo">
+        <img src="Info/face.jpg" alt="photo" onerror="this.parentElement.style.background='#1a4a8a'">
+      </div>
+    </div>
+
+    <div class="act-grid">
+      <button class="act-btn">
+        <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
+          <rect x="0" y="0" width="7" height="3" fill="#ff3b30"/>
+          <rect x="7" y="0" width="6" height="3" fill="#fff"/>
+          <rect x="13" y="0" width="7" height="3" fill="#ff3b30"/>
+          <rect x="0" y="3" width="20" height="8" fill="#fff" rx="1"/>
+          <rect x="0" y="11" width="7" height="3" fill="#ff3b30"/>
+          <rect x="7" y="11" width="6" height="3" fill="#fff"/>
+          <rect x="13" y="11" width="7" height="3" fill="#ff3b30"/>
         </svg>
-        <span>&#928;&#961;&#959;&#963;&#952;&#942;&#954;&#951; &#963;&#964;&#959;<br>Apple Wallet</span>
+        Προσθήκη στο<br>Apple Wallet
       </button>
-      <button class="action-btn">
+      <button class="act-btn">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
           <rect x="7" y="2" width="11" height="14" rx="2" stroke="white" stroke-width="1.3"/>
-          <rect x="2" y="5" width="11" height="14" rx="2" stroke="white" stroke-width="1.3" fill="#003375"/>
+          <rect x="2" y="5" width="11" height="14" rx="2" stroke="white" stroke-width="1.3" fill="rgba(0,51,117,0.5)"/>
           <rect x="2" y="5" width="11" height="14" rx="2" stroke="white" stroke-width="1.3"/>
         </svg>
-        <span>&#913;&#957;&#964;&#943;&#947;&#961;&#945;&#966;&#959;</span>
+        Αντίγραφο
       </button>
-      <button class="action-btn">
+      <button class="act-btn">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
           <rect x="1" y="1" width="7" height="7" rx="1" stroke="white" stroke-width="1.2"/>
           <rect x="12" y="1" width="7" height="7" rx="1" stroke="white" stroke-width="1.2"/>
@@ -545,13 +947,13 @@
           <rect x="13.5" y="2.5" width="4" height="4" fill="white"/>
           <rect x="2.5" y="13.5" width="4" height="4" fill="white"/>
           <rect x="12" y="12" width="2" height="2" fill="white"/>
-          <rect x="15.5" y="12" width="2" height="2" fill="white"/>
-          <rect x="12" y="15.5" width="2" height="2" fill="white"/>
-          <rect x="15.5" y="15.5" width="2" height="2" fill="white"/>
+          <rect x="16" y="12" width="2" height="2" fill="white"/>
+          <rect x="12" y="16" width="2" height="2" fill="white"/>
+          <rect x="16" y="16" width="2" height="2" fill="white"/>
         </svg>
-        <span>&#928;&#961;&#959;&#946;&#959;&#955;&#942; QR<br>&#954;&#969;&#948;&#953;&#954;&#959;&#973;</span>
+        Προβολή QR<br>κωδικού
       </button>
-      <button class="action-btn">
+      <button class="act-btn">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
           <path d="M3 7V4C3 3.45 3.45 3 4 3H7" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
           <path d="M17 7V4C17 3.45 16.55 3 16 3H13" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
@@ -559,77 +961,85 @@
           <path d="M17 13V16C17 16.55 16.55 17 16 17H13" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
           <rect x="7" y="7" width="6" height="6" rx="1" stroke="white" stroke-width="1.2"/>
         </svg>
-        <span>Quick Scan</span>
+        Quick Scan
       </button>
     </div>
 
-    <!-- Fields -->
-    <div class="id-field">
-      <div class="id-field-label">&#917;&#928;&#937;&#925;&#933;&#924;&#927;</div>
-      <div class="id-field-value">KOUMENOS</div>
-      <div class="id-field-label-en">SURNAME</div>
-      <div class="id-field-value" style="font-size:1rem; opacity:0.75;">KOUMENOS</div>
+    <div class="idf">
+      <div class="idf-lbl">ΕΠΩΝΥΜΟ</div>
+      <div class="idf-val">ΚΟΥΜΕΝΟΣ</div>
+      <div class="idf-lbl-en">SURNAME</div>
+      <div class="idf-val-en">KOUMENOS</div>
     </div>
-    <div class="id-field">
-      <div class="id-field-label">&#927;&#925;&#927;&#924;&#913;</div>
-      <div class="id-field-value">&#935;&#929;&#919;&#931;&#932;&#927;&#931;</div>
-      <div class="id-field-label-en">GIVEN NAME</div>
-      <div class="id-field-value" style="font-size:1rem; opacity:0.75;">CHRISTOS</div>
+    <div class="idf">
+      <div class="idf-lbl">ΟΝΟΜΑ</div>
+      <div class="idf-val">ΧΡΗΣΤΟΣ</div>
+      <div class="idf-lbl-en">GIVEN NAME</div>
+      <div class="idf-val-en">CHRISTOS</div>
     </div>
-    <div class="id-field">
-      <div class="id-field-label">&#927;&#925;&#927;&#924;&#913; &#928;&#913;&#932;&#917;&#929;&#913;</div>
-      <div class="id-field-value">&#924;&#921;&#935;&#913;&#919;&#923;</div>
-      <div class="id-field-label-en">FATHER'S NAME</div>
-      <div class="id-field-value" style="font-size:1rem; opacity:0.75;">MICHAIL</div>
+    <div class="idf">
+      <div class="idf-lbl">ΟΝΟΜΑ ΠΑΤΕΡΑ</div>
+      <div class="idf-val">ΜΙΧΑΗΛ</div>
+      <div class="idf-lbl-en">FATHER'S NAME</div>
+      <div class="idf-val-en">MICHAIL</div>
     </div>
-    <div class="id-field">
-      <div class="id-field-label">&#927;&#925;&#927;&#924;&#913; &#924;&#919;&#932;&#917;&#929;&#913;&#931; (MOTHER'S NAME)</div>
-      <div class="id-field-value">&#922;&#913;&#923;&#923;&#921;&#927;&#928;&#919;</div>
+    <div class="idf">
+      <div class="idf-lbl">ΟΝΟΜΑ ΜΗΤΕΡΑΣ</div>
+      <div class="idf-val">ΚΑΛΛΙΟΠΗ</div>
+      <div class="idf-lbl-en">MOTHER'S NAME</div>
     </div>
-    <div class="id-field">
-      <div class="id-field-label">&#919;&#924;. &#915;&#917;&#925;&#925;&#919;&#931;&#917;&#937;&#931; (DATE OF BIRTH)</div>
-      <div class="id-field-value">23/04/2006</div>
+    <div class="idf">
+      <div class="idf-lbl">ΗΜ. ΓΕΝΝΗΣΗΣ</div>
+      <div class="idf-val">23/04/2006</div>
+      <div class="idf-lbl-en">DATE OF BIRTH</div>
     </div>
-    <div class="id-field">
-      <div class="id-field-label">&#932;&#927;&#928;&#927;&#931; &#915;&#917;&#925;&#925;&#919;&#931;&#917;&#937;&#931; (PLACE OF BIRTH)</div>
-      <div class="id-field-value">&#913;&#920;&#919;&#925;&#913; &#913;&#932;&#932;&#921;&#922;&#919;&#931;</div>
+    <div class="idf">
+      <div class="idf-lbl">ΤΟΠΟΣ ΓΕΝΝΗΣΗΣ</div>
+      <div class="idf-val">ΑΘΗΝΑ ΑΤΤΙΚΗΣ</div>
+      <div class="idf-lbl-en">PLACE OF BIRTH</div>
     </div>
-    <div class="id-field">
-      <div class="id-field-label">&#913;&#929;&#935;&#919; &#917;&#922;&#916;&#927;&#931;&#919;&#931; (ISSUANCE OFFICE)</div>
-      <div class="id-field-value">&#932;.&#916;.&#917;.&#917;. &#922;&#919;&#934;&#921;&#931;&#921;&#913;&#931;</div>
+    <div class="idf">
+      <div class="idf-lbl">ΑΡΧΗ ΕΚΔΟΣΗΣ</div>
+      <div class="idf-val">Τ.Δ.Ε.Ε. ΚΗΦΙΣΙΑΣ</div>
+      <div class="idf-lbl-en">ISSUANCE OFFICE</div>
     </div>
 
-    <div class="idcard-footer">
-      <div class="doc-code-row">
+    <div class="idc-footer">
+      <div class="doc-row">
         <div>
-          <div class="doc-code-label">&#922;&#969;&#948;&#953;&#954;&#972;&#962; &#917;&#947;&#947;&#961;&#940;&#966;&#959;&#965;:</div>
-          <div class="doc-code-value">20OxouhjpPDu3fq2OnGINuA</div>
+          <div class="doc-lbl">Κωδικός Εγγράφου:</div>
+          <div class="doc-val">2OOxouhjpPDu3fq2OnGINuA</div>
         </div>
-        <button class="copy-btn" onclick="copyCode()">
+        <button class="copy-btn" onclick="navigator.clipboard.writeText('2OOxouhjpPDu3fq2OnGINuA').catch(()=>{})">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <rect x="7" y="2" width="11" height="14" rx="2" stroke="white" stroke-width="1.3"/>
-            <rect x="2" y="5" width="11" height="14" rx="2" stroke="white" stroke-width="1.3" fill="#003375"/>
+            <rect x="2" y="5" width="11" height="14" rx="2" stroke="white" stroke-width="1.3" fill="rgba(0,51,117,0.5)"/>
             <rect x="2" y="5" width="11" height="14" rx="2" stroke="white" stroke-width="1.3"/>
           </svg>
         </button>
       </div>
       <div class="not-travel">
-        &#916;&#949;&#957; &#945;&#960;&#959;&#964;&#949;&#955;&#949;&#943; &#948;&#953;&#949;&#952;&#957;&#941;&#962; &#964;&#945;&#958;&#953;&#948;&#953;&#969;&#964;&#953;&#954;&#972; &#941;&#947;&#947;&#961;&#945;&#966;&#959;<br>
+        Δεν αποτελεί διεθνές ταξιδιωτικό έγγραφο<br>
         Not an international travel document
       </div>
     </div>
-
   </div>
 </div>
 
 <script>
-  function nav(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
-  function copyCode() {
-    navigator.clipboard.writeText('20OxouhjpPDu3fq2OnGINuA').catch(() => {});
-  }
+function nav(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Carousel dot sync
+const car = document.getElementById('carousel');
+if(car){
+  car.addEventListener('scroll',()=>{
+    const i = Math.round(car.scrollLeft / car.offsetWidth);
+    document.querySelectorAll('.dot').forEach((d,j)=>d.classList.toggle('on',i===j));
+  },{passive:true});
+}
 </script>
 </body>
 </html>
